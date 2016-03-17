@@ -20,7 +20,7 @@ export default class FCrypt {
     $('body').append(this.generateModal());
     this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_lock" data-remodal-target="modal-${this.id}">${LOCK_ICON}</div>`);
     this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_unlock hidden"">${UNLOCK_ICON}</div>`);
-    this.container.find(EDITABLE_DIV).after(`<input class="fcrypt_input hidden" rows="1" style="width:${inputWidth}px; padding-left: 0; padding-right: 0" placeholder="Encrypted Message..." />`);
+    this.container.find(EDITABLE_DIV).after(`<textarea class="fcrypt_input hidden" rows="1" style="width:${inputWidth}px; padding-left: 0; padding-right: 0" placeholder="Encrypted Message..."></textarea>`);
   }
 
   generateModal () {
@@ -61,9 +61,9 @@ export default class FCrypt {
         let message = element.val();
         let cypherText = AES.encrypt(message, 'testing123');
         let inp = this.container.find(EDITABLE_DIV);
-        inp.find('span:last-child').text(cypherText);
+        inp.find('span:last-child').html(`<span data-text="true">${cypherText}</span>`);
 
-        this.container.find(EDITABLE_DIV).removeClass('hidden');
+        inp.removeClass('hidden');
         this.container.find('.fcrypt_input').addClass('hidden');
 
         if (inp.createTextRange) {
