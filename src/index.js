@@ -17,18 +17,21 @@
 .fbNubFlyoutTitlebar	: title section -> used to check how many chats
 */
 
-import $ from 'jquery';
 import * as utils from './utility-functions';
 import FCrypt from './fcrypt';
 
-const CSS_FILES = ['css/font-awesome.min.css', 'css/remodal.css', 'css/remodal-default-theme.css'];
-const JS_FILES = ['scripts/remodal.min.js'];
+const CSS_FILES = ['styles/font-awesome.min.css', 'styles/remodal.css', 'styles/remodal-default-theme.css'];
 
 let css = CSS_FILES.map(file => chrome.extension.getURL(file));
-let js = JS_FILES.map(file => chrome.extension.getURL(file));
 utils.loadCSS(css);
-utils.loadJS(js);
 $('._li').addClass('remodal-bg');
+
+window.REMODAL_GLOBALS = {
+  NAMESPACE: 'modal',
+  DEFAULTS: {
+    hashTracking: false
+  }
+};
 
 $(window).load(function () {
   const CHATS = $('.fbNubFlyoutTitlebar.titlebar');

@@ -7,7 +7,8 @@
   "version": "1.0.0",
   "content_scripts": [{
 	  "matches": ["*://www.facebook.com/*"],
-	  "js": [ "background.js" ]
+	  "js": [ "scripts/jquery-2.2.1.js", "scripts/bililiteRange.js", "scripts/jquery.sendkeys.js", "scripts/remodal.min.js", "background.js" ],
+    "run_at": "document_end"
    }],
-  "web_accessible_resources": ["css/*", "fonts/*", "scripts/*"]
+  "web_accessible_resources": ["styles/*", "fonts/*", "scripts/*"]
 }
