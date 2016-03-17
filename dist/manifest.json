@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+
+  "name": "FCrypt",
+  "short_name": "FCrypt",
+  "description": "Browser extension for encryption of communications through the facebook private messaging system",
+  "version": "1.0.0",
+  "content_scripts": [{
+	  "matches": ["*://www.facebook.com/*"],
+	  "js": [ "background.js" ]
+   }],
+  "web_accessible_resources": ["css/*", "fonts/*", "scripts/*"]
+}
