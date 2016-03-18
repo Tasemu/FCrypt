@@ -2,6 +2,9 @@ const LOCK_ICON = `<a class="fa fa-lock"></a>`;
 const UNLOCK_ICON = `<a class="fa fa-unlock"></a>`;
 const FBC_BUTTONS = '._552n';
 const EDITABLE_DIV = '._5rpu';
+const ENTER_KEY_CODE = 13;
+const BODY = 'body';
+
 const AES = require("crypto-js/aes");
 
 export default class FCrypt {
@@ -10,6 +13,7 @@ export default class FCrypt {
     this.container = element;
     this.sessionActive = false;
     this.id = Math.random().toString(36).substr(2, 9);
+    this.chatObserver = null;
     this.initialiseUI();
     this.setEventListeners();
     this.render();
@@ -17,10 +21,9 @@ export default class FCrypt {
 
   initialiseUI () {
     const inputWidth = this.container.find('._5rpb').width();
-    $('body').append(this.generateModal());
-    this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_lock" data-remodal-target="modal-${this.id}">${LOCK_ICON}</div>`);
-    this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_unlock hidden"">${UNLOCK_ICON}</div>`);
-    this.container.find(EDITABLE_DIV).after(`<textarea class="fcrypt_input hidden" rows="1" style="width:${inputWidth}px; padding-left: 0; padding-right: 0" placeholder="Encrypted Message..."></textarea>`);
+    $(BODY).append(this.generateModal());
+    this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_lock" data-remodal-target="modal-${this.id}">${LOCK_ICON}</div><div class="_6gd fcrypt_unlock hidden"">${UNLOCK_ICON}</div>`);
+    this.container.find(EDITABLE_DIV).after(`<input class="fcrypt_input hidden" rows="1" style="width:${inputWidth}px; padding-left: 0; padding-right: 0" placeholder="Encrypted Message..." />`);
   }
 
   generateModal () {
@@ -36,6 +39,10 @@ export default class FCrypt {
         <button data-remodal-action="confirm" class="remodal-confirm">OK</button>
       </div>`
     );
+  }
+
+  encryptString (string) {
+    return AES.encrypt(string, 'testing123');
   }
 
   setEventListeners () {
@@ -56,26 +63,60 @@ export default class FCrypt {
 
     this.container.on('keyup', '.fcrypt_input', (event) => {
       event.stopPropagation();
-      let element = this.container.find('.fcrypt_input');
-      if (event.keyCode == 13) {
-        let message = element.val();
-        let cypherText = AES.encrypt(message, 'testing123');
-        let inp = this.container.find(EDITABLE_DIV);
-        inp.find('span:last-child').html(`<span data-text="true">${cypherText}</span>`);
+      const element = this.container.find('.fcrypt_input');
+      const chatInput = this.container.find(EDITABLE_DIV);
+      if (event.keyCode == ENTER_KEY_CODE) {
+        const chatInputContent = chatInput.find('span:last-child');
+        let cypherText = this.encryptString(element.val());
 
-        inp.removeClass('hidden');
-        this.container.find('.fcrypt_input').addClass('hidden');
+        chatInputContent.html(`<span data-text="true">${cypherText}</span>`);
+        chatInput.removeClass('hidden');
+        element.addClass('hidden');
 
-        if (inp.createTextRange) {
-					var part = inp.createTextRange();
-					part.move("character", 0);
-					part.select();
-				}else if (inp.setSelectionRange){
-					inp.setSelectionRange(0, 0);
-				}
-        inp.focus().sendkeys('{Backspace}');
+        this.triggerMessageSubmission(chatInput);
       }
     });
+
+    this.chatObserver = new MutationObserver(mutations => {
+      const mine = '._1nc6';
+      const theirs = '._1nc7';
+      const toArray = function() {
+        return [].slice.call(arguments);
+      };
+
+      mutations.forEach(mutation => {
+        console.log(mutation);
+        const MESSAGE_BUBBLE = '._4tdt';
+        toArray(mutation.addedNodes).forEach(node => {
+          const $node = $(node);
+          if ($node.hasClass('._5wd4')) {
+            console.log('message');
+          }
+          // let myMessage = $node.closest(MESSAGE_BUBBLE).find('._5wd4').hasClass(mine) ? true : false;
+          // if (myMessage) {
+          //   $node.find('span:last-child').text('mine');
+          // } else {
+          //   $node.find('span:last-child').text('theirs');
+          // }
+        })
+      });
+    })
+
+    this.chatObserver.observe(this.container.find('.conversation').get(0), {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  triggerMessageSubmission (chatInput) {
+    if (chatInput.createTextRange) {
+      var part = chatInput.createTextRange();
+      part.move("character", 0);
+      part.select();
+    }else if (chatInput.setSelectionRange){
+      chatInput.setSelectionRange(0, 0);
+    }
+    chatInput.focus().sendkeys('{Backspace}');
   }
 
   render () {
