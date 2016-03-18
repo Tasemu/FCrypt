@@ -89,15 +89,7 @@ export default class FCrypt {
         const MESSAGE_BUBBLE = '._4tdt';
         toArray(mutation.addedNodes).forEach(node => {
           const $node = $(node);
-          if ($node.hasClass('._5wd4')) {
-            console.log('message');
-          }
-          // let myMessage = $node.closest(MESSAGE_BUBBLE).find('._5wd4').hasClass(mine) ? true : false;
-          // if (myMessage) {
-          //   $node.find('span:last-child').text('mine');
-          // } else {
-          //   $node.find('span:last-child').text('theirs');
-          // }
+          $node.find('span:last-child').text('encrypted');
         })
       });
     })
