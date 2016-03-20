@@ -1,11 +1,15 @@
+import { toArray } from './utility-functions';
+
 const LOCK_ICON = `<a class="fa fa-lock"></a>`;
 const UNLOCK_ICON = `<a class="fa fa-unlock"></a>`;
 const FBC_BUTTONS = '._552n';
 const EDITABLE_DIV = '._5rpu';
 const ENTER_KEY_CODE = 13;
 const BODY = 'body';
+const MESSAGE_CONTENT_CLASS = '._5yl5';
 
-const AES = require("crypto-js/aes");
+const CryptoJS = require('crypto-js');
+const CYPHER_PREFIX = 'fcrypt::'
 
 export default class FCrypt {
 
@@ -13,17 +17,29 @@ export default class FCrypt {
     this.container = element;
     this.sessionActive = false;
     this.id = Math.random().toString(36).substr(2, 9);
-    this.chatObserver = null;
     this.initialiseUI();
     this.setEventListeners();
+
+    this.chatObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        toArray(mutation.addedNodes).forEach(node => {
+          const $bubble = $(node).find('span:last-child').first();
+          const message = $bubble.text();
+
+          if (message.indexOf(CYPHER_PREFIX) > -1 && this.sessionActive) {
+            $bubble.html(`<span style="color:red">${this.decryptCypher(this.cleanCypher(message))}</span>`);
+          }
+        })
+      });
+    });
+
     this.render();
   }
 
   initialiseUI () {
-    const inputWidth = this.container.find('._5rpb').width();
     $(BODY).append(this.generateModal());
     this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_lock" data-remodal-target="modal-${this.id}">${LOCK_ICON}</div><div class="_6gd fcrypt_unlock hidden"">${UNLOCK_ICON}</div>`);
-    this.container.find(EDITABLE_DIV).after(`<input class="fcrypt_input hidden" rows="1" style="width:${inputWidth}px; padding-left: 0; padding-right: 0" placeholder="Encrypted Message..." />`);
+    this.container.find(EDITABLE_DIV).after(`<input class="fcrypt_input hidden" style="width: 100%;border: none;box-sizing: border-box;position: absolute; top: 0" rows="1" placeholder="Encrypted Message..." />`);
   }
 
   generateModal () {
@@ -41,14 +57,22 @@ export default class FCrypt {
     );
   }
 
+  cleanCypher (cypher) {
+    return cypher.substring(CYPHER_PREFIX)
+  }
+
   encryptString (string) {
-    return AES.encrypt(string, 'testing123');
+    return CYPHER_PREFIX + CryptoJS.AES.encrypt(string, 'testing123');
+  }
+
+  decryptCypher (cypherText) {
+    let decrypted = CryptoJS.AES.decrypt(cypherText.substring(CYPHER_PREFIX.length), 'testing123');
+    return decrypted.toString(CryptoJS.enc.Utf8);
   }
 
   setEventListeners () {
     this.container.on('click', '.fcrypt_lock', () => {
       $(`[data-remodal-id="modal-${this.id}"]`).remodal().open();
-      this.render();
     });
 
     this.container.on('click', '.fcrypt_unlock', () => {
@@ -63,65 +87,53 @@ export default class FCrypt {
 
     this.container.on('keyup', '.fcrypt_input', (event) => {
       event.stopPropagation();
-      const element = this.container.find('.fcrypt_input');
-      const chatInput = this.container.find(EDITABLE_DIV);
+      let element = this.container.find('.fcrypt_input');
+      let chatInput = this.container.find(EDITABLE_DIV);
       if (event.keyCode == ENTER_KEY_CODE) {
-        const chatInputContent = chatInput.find('span:last-child');
-        let cypherText = this.encryptString(element.val());
+        let chatInputContent = chatInput.find('span:last-child');
 
-        chatInputContent.html(`<span data-text="true">${cypherText}</span>`);
-        chatInput.removeClass('hidden');
-        element.addClass('hidden');
+        chatInputContent.html(`<span data-text="true">${this.encryptString(element.val())}</span>`);
+        element.val('');
 
-        this.triggerMessageSubmission(chatInput);
+        if (chatInput.createTextRange) {
+          let part = chatInput.createTextRange();
+          part.move("character", 0);
+          part.select();
+        } else if (chatInput.setSelectionRange) {
+          chatInput.setSelectionRange(0, 0);
+        }
+        chatInput.focus().sendkeys('{Backspace}');
       }
-    });
-
-    this.chatObserver = new MutationObserver(mutations => {
-      const mine = '._1nc6';
-      const theirs = '._1nc7';
-      const toArray = function() {
-        return [].slice.call(arguments);
-      };
-
-      mutations.forEach(mutation => {
-        console.log(mutation);
-        const MESSAGE_BUBBLE = '._4tdt';
-        toArray(mutation.addedNodes).forEach(node => {
-          const $node = $(node);
-          $node.find('span:last-child').text('encrypted');
-        })
-      });
-    })
-
-    this.chatObserver.observe(this.container.find('.conversation').get(0), {
-      childList: true,
-      subtree: true,
     });
   }
 
-  triggerMessageSubmission (chatInput) {
-    if (chatInput.createTextRange) {
-      var part = chatInput.createTextRange();
-      part.move("character", 0);
-      part.select();
-    }else if (chatInput.setSelectionRange){
-      chatInput.setSelectionRange(0, 0);
-    }
-    chatInput.focus().sendkeys('{Backspace}');
+  decryptPastMessages () {
+    this.container.find(MESSAGE_CONTENT_CLASS).each((index, element) => {
+      let message = $(element).text();
+      if (message.indexOf(CYPHER_PREFIX) > -1) {
+        $(element).html(`<span style="color:red">${this.decryptCypher(this.cleanCypher(message))}</span>`);
+      }
+    });
   }
 
   render () {
     if (this.sessionActive) {
       this.container.find('.fcrypt_lock').addClass('hidden');
       this.container.find('.fcrypt_unlock').removeClass('hidden');
-      this.container.find(EDITABLE_DIV).addClass('hidden');
       this.container.find('.fcrypt_input').removeClass('hidden');
+      this.container.find('._1p1t').addClass('hidden');
+      this.decryptPastMessages();
+      this.chatObserver.observe(this.container.find('.conversation').get(0), {
+        childList: true,
+        subtree: true,
+      });
     } else {
       this.container.find('.fcrypt_lock').removeClass('hidden');
       this.container.find('.fcrypt_unlock').addClass('hidden');
-      this.container.find(EDITABLE_DIV).removeClass('hidden');
       this.container.find('.fcrypt_input').addClass('hidden');
+      this.container.find('._1p1t').removeClass('hidden');
+
+      this.chatObserver.disconnect();
     }
   }
 

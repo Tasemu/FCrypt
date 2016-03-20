@@ -6,3 +6,7 @@ export function loadCSS (links) {
     DOM_HEADER.append(`<link rel="stylesheet" href="${file}" media="screen" title="no title" charset="utf-8">`)
   });
 }
+
+export function toArray (object) {
+  return [].slice.call(arguments);
+}
