@@ -38,8 +38,10 @@ export default class FCrypt {
 
   initialiseUI () {
     $(BODY).append(this.generateModal());
-    this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_lock" data-remodal-target="modal-${this.id}">${LOCK_ICON}</div><div class="_6gd fcrypt_unlock hidden"">${UNLOCK_ICON}</div>`);
-    this.container.find(EDITABLE_DIV).after(`<input class="fcrypt_input hidden" style="width: 100%;border: none;box-sizing: border-box;position: absolute; top: 0" rows="1" placeholder="Encrypted Message..." />`);
+    setTimeout(() => {
+      this.container.find(FBC_BUTTONS).append(`<div class="_6gd fcrypt_lock" data-remodal-target="modal-${this.id}">${LOCK_ICON}</div><div class="_6gd fcrypt_unlock hidden"">${UNLOCK_ICON}</div>`);
+      this.container.find(EDITABLE_DIV).after(`<input class="fcrypt_input hidden" style="width: 100%;border: none;box-sizing: border-box;position: absolute; top: 0" rows="1" placeholder="Encrypted Message..." />`);
+    }, 200);
   }
 
   generateModal () {
