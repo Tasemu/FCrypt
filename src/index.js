@@ -13,6 +13,12 @@ loadCSS(css);
 $('._li').addClass('remodal-bg');
 
 $(window).load(function () {
+  const CHATS = $('.fbNubFlyoutTitlebar.titlebar');
+
+  CHATS.each(function () {
+    new FCrypt($(this).closest('.fbNub'));
+  });
+
   let dockObserver = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       toArray(mutation.addedNodes).forEach(node => {
