@@ -16,6 +16,7 @@ export default class FCrypt {
   constructor (element) {
     this.container = element;
     this.sessionActive = false;
+    this.sessionPassword = null;
     this.id = Math.random().toString(36).substr(2, 9);
     this.initialiseUI();
     this.setEventListeners();
@@ -48,10 +49,8 @@ export default class FCrypt {
     return (
       `<div class="remodal" data-remodal-id="modal-${this.id}" data-remodal-options="hashTracking: false">
         <button data-remodal-action="close" class="remodal-close"></button>
-        <h1>Remodal</h1>
-        <p>
-          Responsive, lightweight, fast, synchronized with CSS animations, fully customizable modal window plugin with declarative configuration and hash tracking.
-        </p>
+        <h1>FCrypt | Encrypt your chat session</h1>
+        <input type="password" class="fcrypt_password_field" placeholder="Enter session password here..." style="margin: 30px 0;width: 300px;padding: 10px;border: none;border-bottom: solid 2px #c9c9c9" />
         <br>
         <button data-remodal-action="cancel" class="remodal-cancel">Cancel</button>
         <button data-remodal-action="confirm" class="remodal-confirm">OK</button>
@@ -64,11 +63,11 @@ export default class FCrypt {
   }
 
   encryptString (string) {
-    return CYPHER_PREFIX + CryptoJS.AES.encrypt(string, 'testing123');
+    return CYPHER_PREFIX + CryptoJS.AES.encrypt(string, this.sessionPassword);
   }
 
   decryptCypher (cypherText) {
-    let decrypted = CryptoJS.AES.decrypt(cypherText.substring(CYPHER_PREFIX.length), 'testing123');
+    let decrypted = CryptoJS.AES.decrypt(cypherText.substring(CYPHER_PREFIX.length), this.sessionPassword);
     return decrypted.toString(CryptoJS.enc.Utf8);
   }
 
@@ -84,6 +83,8 @@ export default class FCrypt {
 
     $(document).on('confirmation', `[data-remodal-id="modal-${this.id}"]`, () => {
       this.sessionActive = true;
+      let password = $(`[data-remodal-id="modal-${this.id}"]`).find('.fcrypt_password_field').val();
+      this.sessionPassword = password;
       this.render();
     });
 
