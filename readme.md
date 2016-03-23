@@ -2,6 +2,11 @@
 
 FCrypt is a browser extension that allows for end to end encrypted chat through the facebook.com chat application. Currently the plugin pnly supports facebook.com and not messenger.com, and only supports chrome. Support for more browsers will be added soon and hopefully support for messenger as well.
 
+<div style="text-center">
+<img src="dist/images/decrypted.jpg" />
+<img src="dist/images/encrypted.jpg" />
+</div>
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
