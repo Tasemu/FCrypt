@@ -6,6 +6,10 @@ FCrypt is a browser extension that allows for end to end encrypted chat through 
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
+### Install through the Chrome Web Store
+
+You can install the extension into chrome through the following link: https://chrome.google.com/webstore/detail/fcrypt/iegnoclfhbfgelgobnfekhplapljhcfa
+
 ### Install Packaged Extension file
 
 A testing file as a packaged chrome extension file (.crx) can be downloaded from the releases section of this repo and installed into chrome by dragging the .crx file into the chrome extensions settings panel.
